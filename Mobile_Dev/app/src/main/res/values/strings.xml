@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">JagaMakan</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Masuk</string>
+    <string name="register">Daftar</string>
+    <string name="nama">Nama</string>
+    <string name="login_google">Masuk dengan Google</string>
+    <string name="chart">Chart</string>
+    <string name="rules">Aturan Pemakaian</string>
+    <string name="desc">Deskripsi</string>
+    <string name="no_results">Barang yang anda cari tidak ditemukan</string>
+    <string name="sign_in">Sign In</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="regisTittle">Lengkapi dulu datamu !</string>
+    <string name="regisSubTittle">Masukan datamu dibawah ini !</string>
+    <string name="title_welcome_page">Selamat datang di Jaga Makan!</string>
+    <string name="message_welcome_page">Mari hidup sehat mulai pola makan anda sehari-hari</string>
+    <string name="textWelcomeHome">Halo Sahabat Jaga Makan</string>
+    <string name="subTextWelcomeHome">Selamat datang di Jaga Makan! Kami ada untuk mengontrol konsumsi kalori makanan anda. Kami siap membantu anda dalam perjalanan untuk hidup yang lebih sehat.</string>
+    <string name="subTextCalculator">Sahabat Jaga Makan sudah tau belum\nberapa kebutuhan kalori yang harus dipenuhi\nyuk cek kebutuhan kalorimu sekarang!</string>
+    <string name="textCalculator">Cek Kebutuhan Kalorimu</string>
+    <string name="titleKalori">Ketahui Kebutuhan Kalori Anda</string>
+    <string name="beratBadan">60</string>
+    <string name="titleBeratBadan">Berat</string>
+    <string name="tinggiBadan">160</string>
+    <string name="titleTinggiBadan">Tinggi</string>
+    <string name="umur">20</string>
+    <string name="titleUmur">Umur</string>
+    <string name="cekKebutuhan">1800</string>
+    <string name="titleCekKebutuhan">Kalori</string>
+    <string name="cek">Cek Sekarang</string>
+    <string name="Titlebmr_calculator">BMR Calculator</string>
+</resources>
