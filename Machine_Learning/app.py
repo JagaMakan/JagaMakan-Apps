@@ -25,7 +25,7 @@ print('''
 |_____\___/ \__,_|\__,_|_|_| |_|\__, | |_|  |_|\___/ \__,_|\___|_| (_) (_) (_)
                                 |___/                                         
 ''')
-model = 'model/'
+model = 'saved_model/'
 hub_model = hub.load(model)
 print('''
  __  __           _      _   _                    _          _   _ 
