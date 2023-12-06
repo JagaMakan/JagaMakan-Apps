@@ -29,7 +29,7 @@ oauthlib==3.2.2
 opt-einsum==3.3.0
 packaging==23.2
 Pillow==10.1.0
-protobuf==3.20.1
+protobuf==3.20.3
 pyasn1==0.5.1
 pyasn1-modules==0.3.0
 requests==2.31.0
@@ -38,7 +38,7 @@ rsa==4.9
 six==1.16.0
 tensorboard==2.15.1
 tensorboard-data-server==0.7.2
-tensorflow==2.0.0
+tensorflow==2.15.0
 tensorflow-hub>=0.6.0
 tensorflow-estimator==2.15.0
 termcolor==2.3.0
