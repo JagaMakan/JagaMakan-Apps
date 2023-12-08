@@ -1208,7 +1208,7 @@ def visualize_boxes_and_labels_on_image_array(
             if classes[i] in six.viewkeys(category_index):
               visualize_boxes_and_labels_on_image_array.class_name = category_index[classes[i]]['name']
             else:
-              visualize_boxes_and_labels_on_image_array = 'N/A'
+              visualize_boxes_and_labels_on_image_array.class_name = 'N/A'
             display_str = str(visualize_boxes_and_labels_on_image_array.class_name)
         if not skip_scores:
           if not display_str:
