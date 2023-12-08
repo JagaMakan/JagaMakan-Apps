@@ -1209,9 +1209,7 @@ def evaluator_options_from_eval_config(eval_config):
     elif eval_metric_fn_key == 'precision_at_recall_detection_metrics':
       evaluator_options[eval_metric_fn_key] = {
           'recall_lower_bound': (eval_config.recall_lower_bound),
-          'recall_upper_bound': (eval_config.recall_upper_bound),
-          'skip_predictions_for_unlabeled_class':
-              eval_config.skip_predictions_for_unlabeled_class,
+          'recall_upper_bound': (eval_config.recall_upper_bound)
       }
   return evaluator_options
 

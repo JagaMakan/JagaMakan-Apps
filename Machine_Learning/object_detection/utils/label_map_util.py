@@ -156,15 +156,11 @@ def convert_label_map_to_categories(label_map,
   return categories
 
 
-def load_labelmap(path, validator=None):
+def load_labelmap(path):
   """Loads label map proto.
 
   Args:
     path: path to StringIntLabelMap proto text file.
-    validator: Handle for a function that takes the loaded label map as input
-      and validates it. The validator is expected to raise ValueError for an
-      invalid label map. If None, uses the default validator.
-
   Returns:
     a StringIntLabelMapProto
   """
@@ -175,16 +171,13 @@ def load_labelmap(path, validator=None):
       text_format.Merge(label_map_string, label_map)
     except text_format.ParseError:
       label_map.ParseFromString(label_map_string)
-  if validator is None:
-    validator = _validate_label_map
-  validator(label_map)
+  _validate_label_map(label_map)
   return label_map
 
 
 def get_label_map_dict(label_map_path_or_proto,
                        use_display_name=False,
-                       fill_in_gaps_and_background=False,
-                       validator=None):
+                       fill_in_gaps_and_background=False):
   """Reads a label map and returns a dictionary of label names to id.
 
   Args:
@@ -196,9 +189,6 @@ def get_label_map_dict(label_map_path_or_proto,
     'background' class and will be added if it is missing. All other missing
     ids in range(1, max(id)) will be added with a dummy class name
     ("class_<id>") if they are missing.
-    validator: Handle for a function that takes the loaded label map as input
-      and validates it. The validator is expected to raise ValueError for an
-      invalid label map. If None, uses the default validator.
 
   Returns:
     A dictionary mapping label names to id.
@@ -210,9 +200,7 @@ def get_label_map_dict(label_map_path_or_proto,
   if isinstance(label_map_path_or_proto, string_types):
     label_map = load_labelmap(label_map_path_or_proto)
   else:
-    if validator is None:
-      validator = _validate_label_map
-    validator(label_map_path_or_proto)
+    _validate_label_map(label_map_path_or_proto)
     label_map = label_map_path_or_proto
 
   label_map_dict = {}
@@ -278,8 +266,7 @@ def get_keypoint_label_map_dict(label_map_path_or_proto):
 
 
 def get_label_map_hierarchy_lut(label_map_path_or_proto,
-                                include_identity=False,
-                                validator=None):
+                                include_identity=False):
   """Reads a label map and returns ancestors and descendants in the hierarchy.
 
   The function returns the ancestors and descendants as separate look up tables
@@ -292,9 +279,6 @@ def get_label_map_hierarchy_lut(label_map_path_or_proto,
     include_identity: Boolean to indicate whether to include a class element
       among its ancestors and descendants. Setting this will result in the lut
       diagonal being set to 1.
-    validator: Handle for a function that takes the loaded label map as input
-      and validates it. The validator is expected to raise ValueError for an
-      invalid label map. If None, uses the default validator.
 
   Returns:
     ancestors_lut: Look up table with the ancestors.
@@ -303,9 +287,7 @@ def get_label_map_hierarchy_lut(label_map_path_or_proto,
   if isinstance(label_map_path_or_proto, string_types):
     label_map = load_labelmap(label_map_path_or_proto)
   else:
-    if validator is None:
-      validator = _validate_label_map
-    validator(label_map_path_or_proto)
+    _validate_label_map(label_map_path_or_proto)
     label_map = label_map_path_or_proto
 
   hierarchy_dict = {

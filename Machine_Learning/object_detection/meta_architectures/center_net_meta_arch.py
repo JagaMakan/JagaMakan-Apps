@@ -1392,31 +1392,21 @@ def refine_keypoints(regressed_keypoints,
     # Shape [batch_size, num_instances, max_candidates, num_keypoints].
     tiled_keypoint_scores = tf.tile(
         tf.expand_dims(keypoint_scores, axis=1),
-        multiples=[1, num_instances, 1, 1],
-    )
+        multiples=[1, num_instances, 1, 1])
     ranking_scores = tiled_keypoint_scores / (distances + score_distance_offset)
-    nearby_candidate_inds = tf.math.argmax(
-        ranking_scores, axis=2, output_type=tf.int32
-    )
+    nearby_candidate_inds = tf.math.argmax(ranking_scores, axis=2)
   elif candidate_ranking_mode == 'score_scaled_distance_ratio':
     ranking_scores = sdr_scaled_ranking_score(
-        keypoint_scores, distances, bboxes, score_distance_multiplier
-    )
-    nearby_candidate_inds = tf.math.argmax(
-        ranking_scores, axis=2, output_type=tf.int32
-    )
+        keypoint_scores, distances, bboxes, score_distance_multiplier)
+    nearby_candidate_inds = tf.math.argmax(ranking_scores, axis=2)
   elif candidate_ranking_mode == 'gaussian_weighted':
     ranking_scores = gaussian_weighted_score(
-        keypoint_scores, distances, keypoint_std_dev, bboxes
-    )
-    nearby_candidate_inds = tf.math.argmax(
-        ranking_scores, axis=2, output_type=tf.int32
-    )
+        keypoint_scores, distances, keypoint_std_dev, bboxes)
+    nearby_candidate_inds = tf.math.argmax(ranking_scores, axis=2)
     weighted_scores = tf.math.reduce_max(ranking_scores, axis=2)
   else:
-    raise ValueError(
-        'Not recognized candidate_ranking_mode: %s' % candidate_ranking_mode
-    )
+    raise ValueError('Not recognized candidate_ranking_mode: %s' %
+                     candidate_ranking_mode)
 
   # Gather the coordinates and scores corresponding to the closest candidates.
   # Shape of tensors are [batch_size, num_instances, num_keypoints, 2] and
@@ -1610,12 +1600,14 @@ def _gather_candidates_at_indices(keypoint_candidates,
   combined_indices = tf.stack([
       _multi_range(
           batch_size,
-          value_repetitions=num_keypoints * num_indices),
+          value_repetitions=num_keypoints * num_indices,
+          dtype=tf.int64),
       _multi_range(
           num_keypoints,
           value_repetitions=num_indices,
-          range_repetitions=batch_size),
-      tf.reshape(tf.cast(nearby_candidate_inds_transposed, tf.int32), [-1])
+          range_repetitions=batch_size,
+          dtype=tf.int64),
+      tf.reshape(nearby_candidate_inds_transposed, [-1])
   ], axis=1)
 
   nearby_candidate_coords_transposed = tf.gather_nd(
@@ -3077,7 +3069,8 @@ class CenterNetMetaArch(model.DetectionModel):
           width=input_width,
           gt_classes_list=gt_classes_list,
           gt_keypoints_list=gt_keypoints_list,
-          gt_weights_list=gt_weights_list)
+          gt_weights_list=gt_weights_list,
+          maximum_normalized_coordinate=maximum_normalized_coordinate)
     else:
       gt_boxes_list = self.groundtruth_lists(fields.BoxListFields.boxes)
       heatmap_targets = assigner.assign_center_targets_from_boxes(
@@ -4242,15 +4235,6 @@ class CenterNetMetaArch(model.DetectionModel):
           axis=-2)
       multiclass_scores = postprocess_dict[
           fields.DetectionResultFields.detection_multiclass_scores]
-      num_classes = tf.shape(multiclass_scores)[2]
-      class_mask = tf.cast(
-          tf.one_hot(
-              postprocess_dict[fields.DetectionResultFields.detection_classes],
-              depth=num_classes), tf.bool)
-      # Surpress the scores of those unselected classes to be zeros. Otherwise,
-      # the downstream NMS ops might be confused and introduce issues.
-      multiclass_scores = tf.where(
-          class_mask, multiclass_scores, tf.zeros_like(multiclass_scores))
       num_valid_boxes = postprocess_dict.pop(
           fields.DetectionResultFields.num_detections)
       # Remove scores and classes as NMS will compute these form multiclass

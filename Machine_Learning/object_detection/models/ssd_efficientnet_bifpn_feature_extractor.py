@@ -23,12 +23,12 @@ from six.moves import range
 from six.moves import zip
 import tensorflow.compat.v2 as tf
 
+from tensorflow.python.keras import backend as keras_backend
 from object_detection.meta_architectures import ssd_meta_arch
 from object_detection.models import bidirectional_feature_pyramid_generators as bifpn_generators
 from object_detection.utils import ops
 from object_detection.utils import shape_utils
 from object_detection.utils import tf_version
-
 # pylint: disable=g-import-not-at-top
 if tf_version.is_tf2():
   try:
@@ -43,18 +43,6 @@ _EFFICIENTNET_LEVEL_ENDPOINTS = {
     4: 'stack_4/block_2/add',
     5: 'stack_6/block_0/project_bn',
 }
-
-
-def _is_tpu_strategy_class(clz):
-  is_tpu_strat = lambda k: k.__name__.startswith('TPUStrategy')
-  if is_tpu_strat(clz):
-    return True
-  return any(map(_is_tpu_strategy_class, clz.__bases__))
-
-
-def is_tpu_strategy(strategy):
-  """Returns whether input is a TPUStrategy instance or subclass instance."""
-  return _is_tpu_strategy_class(strategy.__class__)
 
 
 class SSDEfficientNetBiFPNKerasFeatureExtractor(
@@ -77,7 +65,6 @@ class SSDEfficientNetBiFPNKerasFeatureExtractor(
                efficientnet_version,
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name=None):
     """SSD Keras-based EfficientNetBiFPN (EfficientDet) feature extractor.
@@ -120,8 +107,6 @@ class SSDEfficientNetBiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for bifpn unsampling.
       override_base_feature_extractor_hyperparams: Whether to override the
         efficientnet backbone's default weight decay with the weight decay
         defined by `conv_hyperparams`. Note, only overriding of weight decay is
@@ -156,7 +141,6 @@ class SSDEfficientNetBiFPNKerasFeatureExtractor(
     self._bifpn_num_filters = max(bifpn_num_filters, min_depth)
     self._bifpn_node_params = {'combine_method': bifpn_combine_method}
     self._efficientnet_version = efficientnet_version
-    self._use_native_resize_op = use_native_resize_op
 
     logging.info('EfficientDet EfficientNet backbone version: %s',
                  self._efficientnet_version)
@@ -181,7 +165,7 @@ class SSDEfficientNetBiFPNKerasFeatureExtractor(
       efficientnet_overrides[
           'weight_decay'] = conv_hyperparams.get_regularizer_weight()
     if (conv_hyperparams.use_sync_batch_norm() and
-        is_tpu_strategy(tf.distribute.get_strategy())):
+        keras_backend.is_tpu_strategy(tf.distribute.get_strategy())):
       efficientnet_overrides['batch_norm'] = 'tpu'
     efficientnet_base = efficientnet_model.EfficientNet.from_name(
         model_name=self._efficientnet_version, overrides=efficientnet_overrides)
@@ -203,7 +187,6 @@ class SSDEfficientNetBiFPNKerasFeatureExtractor(
         conv_hyperparams=self._conv_hyperparams,
         freeze_batchnorm=self._freeze_batchnorm,
         bifpn_node_params=self._bifpn_node_params,
-        use_native_resize_op=self._use_native_resize_op,
         name='bifpn')
     self.built = True
 
@@ -270,7 +253,6 @@ class SSDEfficientNetB0BiFPNKerasFeatureExtractor(
                bifpn_combine_method='fast_attention',
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name='EfficientDet-D0'):
     """SSD Keras EfficientNet-b0 BiFPN (EfficientDet-d0) Feature Extractor.
@@ -311,8 +293,6 @@ class SSDEfficientNetB0BiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for BiFPN unsampling.
       override_base_feature_extractor_hyperparams: unsupported. Whether to
         override hyperparameters of the base feature extractor with the one from
         `conv_hyperparams`.
@@ -335,7 +315,6 @@ class SSDEfficientNetB0BiFPNKerasFeatureExtractor(
         efficientnet_version='efficientnet-b0',
         use_explicit_padding=use_explicit_padding,
         use_depthwise=use_depthwise,
-        use_native_resize_op=use_native_resize_op,
         override_base_feature_extractor_hyperparams=
         override_base_feature_extractor_hyperparams,
         name=name)
@@ -360,7 +339,6 @@ class SSDEfficientNetB1BiFPNKerasFeatureExtractor(
                bifpn_combine_method='fast_attention',
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name='EfficientDet-D1'):
     """SSD Keras EfficientNet-b1 BiFPN (EfficientDet-d1) Feature Extractor.
@@ -401,8 +379,6 @@ class SSDEfficientNetB1BiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for BiFPN unsampling.
       override_base_feature_extractor_hyperparams: unsupported. Whether to
         override hyperparameters of the base feature extractor with the one from
         `conv_hyperparams`.
@@ -425,7 +401,6 @@ class SSDEfficientNetB1BiFPNKerasFeatureExtractor(
         efficientnet_version='efficientnet-b1',
         use_explicit_padding=use_explicit_padding,
         use_depthwise=use_depthwise,
-        use_native_resize_op=use_native_resize_op,
         override_base_feature_extractor_hyperparams=
         override_base_feature_extractor_hyperparams,
         name=name)
@@ -450,7 +425,6 @@ class SSDEfficientNetB2BiFPNKerasFeatureExtractor(
                bifpn_combine_method='fast_attention',
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name='EfficientDet-D2'):
 
@@ -492,8 +466,6 @@ class SSDEfficientNetB2BiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for BiFPN unsampling.
       override_base_feature_extractor_hyperparams: unsupported. Whether to
         override hyperparameters of the base feature extractor with the one from
         `conv_hyperparams`.
@@ -516,7 +488,6 @@ class SSDEfficientNetB2BiFPNKerasFeatureExtractor(
         efficientnet_version='efficientnet-b2',
         use_explicit_padding=use_explicit_padding,
         use_depthwise=use_depthwise,
-        use_native_resize_op=use_native_resize_op,
         override_base_feature_extractor_hyperparams=
         override_base_feature_extractor_hyperparams,
         name=name)
@@ -541,7 +512,6 @@ class SSDEfficientNetB3BiFPNKerasFeatureExtractor(
                bifpn_combine_method='fast_attention',
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name='EfficientDet-D3'):
 
@@ -583,8 +553,6 @@ class SSDEfficientNetB3BiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for BiFPN unsampling.
       override_base_feature_extractor_hyperparams: unsupported. Whether to
         override hyperparameters of the base feature extractor with the one from
         `conv_hyperparams`.
@@ -607,7 +575,6 @@ class SSDEfficientNetB3BiFPNKerasFeatureExtractor(
         efficientnet_version='efficientnet-b3',
         use_explicit_padding=use_explicit_padding,
         use_depthwise=use_depthwise,
-        use_native_resize_op=use_native_resize_op,
         override_base_feature_extractor_hyperparams=
         override_base_feature_extractor_hyperparams,
         name=name)
@@ -632,7 +599,6 @@ class SSDEfficientNetB4BiFPNKerasFeatureExtractor(
                bifpn_combine_method='fast_attention',
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name='EfficientDet-D4'):
 
@@ -674,8 +640,6 @@ class SSDEfficientNetB4BiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for BiFPN unsampling.
       override_base_feature_extractor_hyperparams: unsupported. Whether to
         override hyperparameters of the base feature extractor with the one from
         `conv_hyperparams`.
@@ -698,7 +662,6 @@ class SSDEfficientNetB4BiFPNKerasFeatureExtractor(
         efficientnet_version='efficientnet-b4',
         use_explicit_padding=use_explicit_padding,
         use_depthwise=use_depthwise,
-        use_native_resize_op=use_native_resize_op,
         override_base_feature_extractor_hyperparams=
         override_base_feature_extractor_hyperparams,
         name=name)
@@ -723,7 +686,6 @@ class SSDEfficientNetB5BiFPNKerasFeatureExtractor(
                bifpn_combine_method='fast_attention',
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name='EfficientDet-D5'):
 
@@ -765,8 +727,6 @@ class SSDEfficientNetB5BiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for BiFPN unsampling.
       override_base_feature_extractor_hyperparams: unsupported. Whether to
         override hyperparameters of the base feature extractor with the one from
         `conv_hyperparams`.
@@ -789,7 +749,6 @@ class SSDEfficientNetB5BiFPNKerasFeatureExtractor(
         efficientnet_version='efficientnet-b5',
         use_explicit_padding=use_explicit_padding,
         use_depthwise=use_depthwise,
-        use_native_resize_op=use_native_resize_op,
         override_base_feature_extractor_hyperparams=
         override_base_feature_extractor_hyperparams,
         name=name)
@@ -814,7 +773,6 @@ class SSDEfficientNetB6BiFPNKerasFeatureExtractor(
                bifpn_combine_method='sum',
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name='EfficientDet-D6-D7'):
 
@@ -861,8 +819,6 @@ class SSDEfficientNetB6BiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for BiFPN unsampling.
       override_base_feature_extractor_hyperparams: unsupported. Whether to
         override hyperparameters of the base feature extractor with the one from
         `conv_hyperparams`.
@@ -885,7 +841,6 @@ class SSDEfficientNetB6BiFPNKerasFeatureExtractor(
         efficientnet_version='efficientnet-b6',
         use_explicit_padding=use_explicit_padding,
         use_depthwise=use_depthwise,
-        use_native_resize_op=use_native_resize_op,
         override_base_feature_extractor_hyperparams=
         override_base_feature_extractor_hyperparams,
         name=name)
@@ -910,7 +865,6 @@ class SSDEfficientNetB7BiFPNKerasFeatureExtractor(
                bifpn_combine_method='sum',
                use_explicit_padding=None,
                use_depthwise=None,
-               use_native_resize_op=False,
                override_base_feature_extractor_hyperparams=None,
                name='EfficientNet-B7_BiFPN'):
 
@@ -952,8 +906,6 @@ class SSDEfficientNetB7BiFPNKerasFeatureExtractor(
       use_depthwise: unsupported by EfficientNetBiFPN, since BiFPN uses regular
         convolutions when inputs to a node have a differing number of channels,
         and use separable convolutions after combine operations.
-      use_native_resize_op: If True, will use
-        tf.compat.v1.image.resize_nearest_neighbor for BiFPN unsampling.
       override_base_feature_extractor_hyperparams: unsupported. Whether to
         override hyperparameters of the base feature extractor with the one from
         `conv_hyperparams`.
@@ -976,7 +928,6 @@ class SSDEfficientNetB7BiFPNKerasFeatureExtractor(
         efficientnet_version='efficientnet-b7',
         use_explicit_padding=use_explicit_padding,
         use_depthwise=use_depthwise,
-        use_native_resize_op=use_native_resize_op,
         override_base_feature_extractor_hyperparams=
         override_base_feature_extractor_hyperparams,
         name=name)

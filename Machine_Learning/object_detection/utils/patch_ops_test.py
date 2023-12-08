@@ -118,9 +118,7 @@ class GetPatchMaskTest(test_case.TestCase, parameterized.TestCase):
           y, x, patch_size=3, image_shape=image_shape)
       return mask
 
-    with self.assertRaises(
-        (tf.errors.InvalidArgumentError, tf.errors.InternalError)
-    ):
+    with self.assertRaises(tf.errors.InvalidArgumentError):
       self.execute(graph_fn, [])
 
   @parameterized.parameters(
@@ -143,9 +141,7 @@ class GetPatchMaskTest(test_case.TestCase, parameterized.TestCase):
           0, 0, patch_size=patch_size, image_shape=image_shape)
       return mask
 
-    with self.assertRaises(
-        (tf.errors.InvalidArgumentError, tf.errors.InternalError)
-    ):
+    with self.assertRaises(tf.errors.InvalidArgumentError):
       self.execute(graph_fn, [])
 
 
