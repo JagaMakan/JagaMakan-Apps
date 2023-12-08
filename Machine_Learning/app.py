@@ -66,6 +66,7 @@ def predict():
                 np.mean(image_np[0], 2, keepdims=True), (1, 1, 3)).astype(np.uint8)
         results = hub_model(image_np)
         result = {key: value.numpy() for key, value in results.items()}
+        print(result['detection_classes'][0])
         label_id_offset = 0
         image_np_with_detections = load_image_into_numpy_array(image_path)
         viz_utils.visualize_boxes_and_labels_on_image_array(
