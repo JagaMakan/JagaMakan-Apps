@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -17,10 +16,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -33,7 +32,7 @@ import java.io.File
 
 class DetectActivity : AppCompatActivity() {
 
-    private var backCamera: Boolean = true
+    private var openCamera: Boolean = true
     private lateinit var binding: ActivityDetectBinding
     private lateinit var viewModel: DetectViewModel
     private var getFile: File? = null
@@ -47,19 +46,18 @@ class DetectActivity : AppCompatActivity() {
 
         setupAction()
 
-        viewModel.detectImage.observe(this, Observer { file ->
+        viewModel.detectImage.observe(this) { file ->
             getFile = file
             if (getFile != null) {
-                binding.imgPreview.setImageBitmap(
+                binding.imgShow.setImageBitmap(
                     rotateBitmap(
-                        BitmapFactory.decodeFile(getFile?.path),
-                        backCamera
+                        BitmapFactory.decodeFile(getFile?.path), openCamera
                     )
                 )
             } else {
-                binding.imgPreview.setImageResource(R.drawable.ic_preview)
+                binding.imgShow.setImageResource(R.drawable.ic_preview)
             }
-        })
+        }
 
         viewModel.isLoading.observe(this) {
             showLoading(it)
@@ -91,31 +89,33 @@ class DetectActivity : AppCompatActivity() {
                 viewModel.clearDetect()
             } else {
                 showLoading(false)
-                Toast.makeText(this, "Scan Ulang Makananmu", Toast.LENGTH_SHORT).show()
+
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage("Scan Ulang Makananmu")
+                    .setPositiveButton("OK") { dialog, which ->
+                    }.setCancelable(false).show()
             }
+
         }
     }
 
     private fun detectResult(detectResponse: DetectResponse) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.popup_layout_test)
+        dialog.setContentView(R.layout.popup_detect_result)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        val tvJudul = dialog.findViewById<TextView>(R.id.tv_judul_popUp2)
-        val tvDetail = dialog.findViewById<TextView>(R.id.tv_detail2)
-        val imgDetail = dialog.findViewById<ImageView>(R.id.imgScan)
-        val buttonOk = dialog.findViewById<Button>(R.id.btn_ok)
+        val tvNamaMakan = dialog.findViewById<TextView>(R.id.tvNamaMakanan)
+        val tvKaloriMakanan = dialog.findViewById<TextView>(R.id.tvKaloriMakanan)
+        val imgDetectResult = dialog.findViewById<ImageView>(R.id.imgDetectResult)
+        val actionButton = dialog.findViewById<Button>(R.id.actionButton)
 
-        tvJudul.text = labelName(label = detectResponse.combinedName)
-        tvDetail.text = "${detectResponse.totalCalories} Kalori"
+        tvNamaMakan.text = labelName(label = detectResponse.combinedName)
+        tvKaloriMakanan.text = "${detectResponse.totalCalories} Kalori"
 
-        Glide.with(applicationContext)
-            .load(detectResponse.imageUrl)
-            .skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .into(imgDetail)
+        Glide.with(applicationContext).load(detectResponse.imageUrl).skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE).into(imgDetectResult)
 
-        buttonOk.setOnClickListener {
+        actionButton.setOnClickListener {
             dialog.dismiss()
         }
 
@@ -160,10 +160,11 @@ class DetectActivity : AppCompatActivity() {
         }
     }
 
-
     private fun deleteImage() {
         if (getFile == null) {
-            Toast.makeText(this, "Tidak ada gambar", Toast.LENGTH_SHORT).show()
+            val builder = AlertDialog.Builder(this)
+            builder.setMessage("Tidak ada gambar").setPositiveButton("OK") { dialog, which ->
+                }.setCancelable(false).show()
         } else {
             getFile = null
             viewModel.clearDetect()
@@ -179,7 +180,7 @@ class DetectActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == CAMERA_X_RESULT) {
                 val myFile = it.data?.getSerializableExtra("picture") as File
-                backCamera = it.data?.getBooleanExtra("backCamera", true) as Boolean
+                openCamera = it.data?.getBooleanExtra("backCamera", true) as Boolean
 
                 viewModel.setScannedImage(myFile)
             }
@@ -201,10 +202,6 @@ class DetectActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
-    }
 
     private fun showLoading(loading: Boolean) {
         binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE

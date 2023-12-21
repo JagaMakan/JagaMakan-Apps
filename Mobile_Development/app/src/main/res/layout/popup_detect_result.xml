@@ -22,7 +22,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/imgScan"
+        android:id="@+id/imgDetectResult"
         android:layout_width="250dp"
         android:layout_height="200dp"
         android:layout_marginTop="28dp"
@@ -44,7 +44,7 @@
         android:fontFamily="@font/poppins_bold"
         android:text="@string/nama_makanan"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgScan" />
+        app:layout_constraintTop_toBottomOf="@+id/imgDetectResult" />
 
     <TextView
         android:id="@+id/Total_Kalori"
@@ -60,7 +60,7 @@
         app:layout_constraintTop_toBottomOf="@+id/namaMakanan" />
 
     <TextView
-        android:id="@+id/tv_judul_popUp2"
+        android:id="@+id/tvNamaMakanan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/poppins_regular"
@@ -68,11 +68,12 @@
         android:text="@string/nasi_goreng"
         android:layout_marginStart="10dp"
         android:textSize="12sp"
+        android:textColor="@color/black"
         app:layout_constraintStart_toEndOf="@+id/namaMakanan"
         app:layout_constraintTop_toTopOf="@+id/namaMakanan" />
 
     <TextView
-        android:id="@+id/tv_detail2"
+        android:id="@+id/tvKaloriMakanan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/poppins_regular"
@@ -85,7 +86,7 @@
         app:layout_constraintTop_toTopOf="@+id/Total_Kalori" />
 
     <Button
-        android:id="@+id/btn_ok"
+        android:id="@+id/actionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"

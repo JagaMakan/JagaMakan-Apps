@@ -167,7 +167,7 @@
     <string name="masukan_dulu_datamu_ya">Masukan dulu datamu ya</string>
     <string name="sudah_siap_untuk_memindai_makanananmu">Sudah siap untuk memindai makanananmu?</string>
     <string name="judul_artikel">Judul Artikel</string>
-    <string name="hai_sahabat_jagamakan_silahkan_foto_makanan_anda_untuk_menghitung_jumlah_kalorinya">Hai Sobat! Jangan ragu untuk menghitung kalori\nmakananmu. Ayo hitung jumlah kalorinya!.</string>
+    <string name="hitung">aku siap membantu menghitung kalorimu.\nApa makanan yang ingin kamu hitung kalorinya?</string>
     <string name="cek_kalori">Cek Kalori</string>
     <string name="scan_kalori_makanan_anda">Scan Kalori Makanan Anda</string>
     <string name="harap_foto_makanan_anda_dengan_posisi_potrait">Harap Foto Makanan Anda Dengan Posisi Potrait</string>
@@ -182,6 +182,8 @@
     <string name="onboarding_tittle_artikel">Explore Pengetahuan Kesehatan</string>
     <string name="onboarding_sub_kalkulator">Ketahui dan Hitung Kalori Harianmu, Mantapkan Energi Sehari-hari!</string>
     <string name="onboarding_sub_artikel">Mengetahui Berbagai Tips-Tips Bermanfaat Seputar Kesehatan</string>
+    <string name="hitung_kalori">Hitung Kalori</string>
+    <string name="deteksi">Deteksi Kalori Makanan</string>
 
 
 </resources>

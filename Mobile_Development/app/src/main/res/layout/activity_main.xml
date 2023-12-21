@@ -42,7 +42,6 @@
         android:layout_height="wrap_content"
         android:src="@drawable/baseline_camera_alt_24"
         app:tint="@color/black"
-        android:backgroundTint="@color/white"
         app:layout_anchor="@id/bottomAppBar"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
