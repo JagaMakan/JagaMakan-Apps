@@ -21,7 +21,7 @@ import csv
 app = Flask(__name__)
 
 app.config["ALLOWED_EXTENSIONS"] = set(["png", "jpg", "jpeg"])
-app.config["UPLOAD_FOLDER"] = "uploads/"
+app.config["UPLOAD_FOLDER"] = "static/uploads/"
 app.config["DOWNLOAD_FOLDER"] = "downloads/"
 
 LABEL_FILENAME = "labels/labelmap.pbtxt"
@@ -109,6 +109,10 @@ def index():
     }
     return jsonify(hello_json)
 
+@app.route('/post', methods=['POST'])
+def post():
+    data = request.get_json()
+    return jsonify(data)
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -164,9 +168,43 @@ def predict():
             predicted_image.save("downloads/" + filename)
             json = {
                 "detected_label": label,
-                "image-url": "nama-api-save-image/"
+                "image-url": "https://jagamakan-73qrxkgpja-et.a.run.app/downloads/"
                 + filename,  # ini aku kurang ngerti seharusnya cc lebih ngerti ini apa
             }
+            #API CC
+            total_calories = sum(item["calories"] for item in json["detected_label"])
+            json["total_calories"] = total_calories
+
+            combined_info = {}
+            for food_item in json["detected_label"]:
+                name = food_item["name"]
+                quantity = food_item["quantity"]
+                if name in combined_info:
+                    combined_info[name] += quantity
+                else:
+                    combined_info[name] = quantity
+            
+            combined_name = ""
+            combined_quantity = ""
+            combined_calories = ""
+            for food_item in json["detected_label"]:
+                name = str(food_item["name"])
+                combined_name += name + ", "
+            for food_item in json["detected_label"]:
+                quantity = str(food_item["quantity"])
+                combined_quantity += quantity + ", "
+            for food_item in json["detected_label"]:
+                calories = str(food_item["calories"])
+                combined_calories += calories + ", "
+            
+            combined_name = combined_name[:-2]
+            combined_quantity = combined_quantity[:-2]
+            combined_calories = combined_calories[:-2]
+            
+            json["combined_info"] = combined_info
+            json["combined_name"] = combined_name
+            json["combined_quantity"] = combined_quantity
+            json["combined_calories"] = combined_calories
             return jsonify(json)
     else:
         json = {
