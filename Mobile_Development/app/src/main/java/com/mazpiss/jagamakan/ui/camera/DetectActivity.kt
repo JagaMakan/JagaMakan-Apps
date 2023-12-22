@@ -70,8 +70,8 @@ class DetectActivity : AppCompatActivity() {
 
     private fun setupAction() {
         binding.apply {
-            buttonCamera.setOnClickListener { startCamera() }
-            buttonX.setOnClickListener { deleteImage() }
+            buttonCamera.setOnClickListener { startAction() }
+            buttonX.setOnClickListener { deleteObject() }
             buttonDetect.setOnClickListener { detectAction() }
         }
     }
@@ -160,7 +160,7 @@ class DetectActivity : AppCompatActivity() {
         }
     }
 
-    private fun deleteImage() {
+    private fun deleteObject() {
         if (getFile == null) {
             val builder = AlertDialog.Builder(this)
             builder.setMessage("Tidak ada gambar").setPositiveButton("OK") { dialog, which ->
@@ -171,7 +171,7 @@ class DetectActivity : AppCompatActivity() {
         }
     }
 
-    private fun startCamera() {
+    private fun startAction() {
         val intent = Intent(this, CameraActivity::class.java)
         launcherIntentCameraX.launch(intent)
     }
